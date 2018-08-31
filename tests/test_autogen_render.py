@@ -937,6 +937,15 @@ class AutogenRenderTest(TestBase):
             "server_default='5', nullable=True))"
         )
 
+    def test_render_add_column_with_comment(self):
+        op_obj = ops.AddColumnOp(
+            "foo", Column("x", Integer, comment="This is a Column"))
+        eq_ignore_whitespace(
+            autogenerate.render_op_text(self.autogen_context, op_obj),
+            "op.add_column('foo', sa.Column('x', sa.Integer(), "
+            "server_default='5', nullable=True, comment='This is a Column'))"
+        )
+
     def test_render_add_column_w_schema(self):
         op_obj = ops.AddColumnOp(
             "bar", Column("x", Integer, server_default="5"),
