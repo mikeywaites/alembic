@@ -943,7 +943,7 @@ class AutogenRenderTest(TestBase):
         eq_ignore_whitespace(
             autogenerate.render_op_text(self.autogen_context, op_obj),
             "op.add_column('foo', sa.Column('x', sa.Integer(), "
-            "server_default='5', nullable=True, comment='This is a Column'))"
+            "nullable=True, comment='This is a Column'))"
         )
 
     def test_render_add_column_w_schema(self):
@@ -1010,6 +1010,19 @@ class AutogenRenderTest(TestBase):
             'sa.Column(\'updated_at\', sa.TIMESTAMP(), '
             'server_default=\'TIMEZONE("utc", CURRENT_TIMESTAMP)\', '
             'nullable=False)'
+        )
+
+    def test_render_col_with_comment(self):
+        c = Column('some_key', Integer, comment='This is a comment')
+        Table('some_table', MetaData(), c)
+        result = autogenerate.render._render_column(
+            c, self.autogen_context
+        )
+        eq_ignore_whitespace(
+            result,
+            'sa.Column(\'some_key\', sa.Integer(), '
+            'nullable=True, '
+            'comment=\'This is a comment\')'
         )
 
     def test_render_col_autoinc_false_mysql(self):
@@ -1142,6 +1155,17 @@ class AutogenRenderTest(TestBase):
             "op.alter_column('sometable', 'somecolumn', "
             "existing_type=sa.BigInteger(), type_=sa.Integer(), "
             "autoincrement=True)"
+        )
+
+    def test_render_modify_comment(self):
+        op_obj = ops.AlterColumnOp(
+            "sometable", "somecolumn",
+            modify_comment="This is a comment"
+        )
+        eq_ignore_whitespace(
+            autogenerate.render_op_text(self.autogen_context, op_obj),
+            "op.alter_column('sometable', 'somecolumn', "
+            "comment='This is a comment')"
         )
 
     def test_render_fk_constraint_kwarg(self):

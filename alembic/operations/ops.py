@@ -1233,7 +1233,9 @@ class AlterColumnOp(AlterTableOp):
             existing_type=None,
             existing_server_default=False,
             existing_nullable=None,
+            existing_comment=None,
             modify_nullable=None,
+            modify_comment=None,
             modify_server_default=False,
             modify_name=None,
             modify_type=None,
@@ -1245,7 +1247,9 @@ class AlterColumnOp(AlterTableOp):
         self.existing_type = existing_type
         self.existing_server_default = existing_server_default
         self.existing_nullable = existing_nullable
+        self.existing_comment = existing_comment
         self.modify_nullable = modify_nullable
+        self.modify_comment = modify_comment
         self.modify_server_default = modify_server_default
         self.modify_name = modify_name
         self.modify_type = modify_type
@@ -1261,6 +1265,7 @@ class AlterColumnOp(AlterTableOp):
                  {
                      "existing_nullable": self.existing_nullable,
                      "existing_server_default": self.existing_server_default,
+                     "existing_comment": self.existing_comment
                  },
                  self.existing_type,
                  self.modify_type)
@@ -1271,7 +1276,8 @@ class AlterColumnOp(AlterTableOp):
                 ("modify_nullable", schema, tname, cname,
                     {
                         "existing_type": self.existing_type,
-                        "existing_server_default": self.existing_server_default
+                        "existing_server_default": self.existing_server_default,
+                        "existing_comment": self.existing_comment
                     },
                     self.existing_nullable,
                     self.modify_nullable)
@@ -1282,10 +1288,23 @@ class AlterColumnOp(AlterTableOp):
                 ("modify_default", schema, tname, cname,
                  {
                      "existing_nullable": self.existing_nullable,
-                     "existing_type": self.existing_type
+                     "existing_type": self.existing_type,
+                     "existing_comment": self.existing_comment
                  },
                  self.existing_server_default,
                  self.modify_server_default)
+            )
+
+        if self.modify_comment is not None:
+            col_diff.append(
+                ("modify_comment", schema, tname, cname,
+                 {
+                     "existing_nullable": self.existing_nullable,
+                     "existing_type": self.existing_type,
+                     "existing_server_default": self.existing_server_default,
+                 },
+                 self.existing_comment,
+                 self.modify_comment)
             )
 
         return col_diff
@@ -1293,7 +1312,8 @@ class AlterColumnOp(AlterTableOp):
     def has_changes(self):
         hc1 = self.modify_nullable is not None or \
             self.modify_server_default is not False or \
-            self.modify_type is not None
+            self.modify_type is not None or \
+            self.modify_comment is not None
         if hc1:
             return True
         for kw in self.kw:
@@ -1337,6 +1357,7 @@ class AlterColumnOp(AlterTableOp):
     def alter_column(
         cls, operations, table_name, column_name,
         nullable=None,
+        comment=None,
         server_default=False,
         new_column_name=None,
         type_=None,
@@ -1438,6 +1459,7 @@ class AlterColumnOp(AlterTableOp):
             modify_type=type_,
             modify_server_default=server_default,
             modify_nullable=nullable,
+            modify_comment=comment,
             **kw
         )
 
@@ -1447,6 +1469,7 @@ class AlterColumnOp(AlterTableOp):
     def batch_alter_column(
         cls, operations, column_name,
         nullable=None,
+        comment=None,
         server_default=False,
         new_column_name=None,
         type_=None,
@@ -1473,6 +1496,7 @@ class AlterColumnOp(AlterTableOp):
             modify_type=type_,
             modify_server_default=server_default,
             modify_nullable=nullable,
+            modify_comment=comment,
             **kw
         )
 
