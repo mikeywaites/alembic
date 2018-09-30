@@ -136,6 +136,18 @@ class PostgresqlOpTest(TestBase):
             'USING gist ("SomeColumn" WITH >) WHERE ("SomeColumn" > 5)'
         )
 
+    def test_alter_column_only_sets_comment_for_postgresql(self):
+        context = op_fixture('postgresql')
+        op.alter_column(
+            "t", "c", nullable=False, existing_type=Boolean(),
+            schema='foo', comment='This is a column comment'
+        )
+
+        context.assert_(
+            "ALTER TABLE foo.t ALTER COLUMN c SET NOT NULL",
+            "COMMENT ON COLUMN t.c IS 'This is a column comment'"
+        )
+
 
 class PGOfflineEnumTest(TestBase):
 

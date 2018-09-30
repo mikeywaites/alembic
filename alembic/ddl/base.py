@@ -94,6 +94,12 @@ class DropColumn(AlterTable):
         self.column = column
 
 
+class ColumnComment(AlterColumn):
+    def __init__(self, name, column_name, comment, **kw):
+        super(ColumnComment, self).__init__(name, column_name, **kw)
+        self.comment = comment
+
+
 @compiles(RenameTable)
 def visit_rename_table(element, compiler, **kw):
     return "%s RENAME TO %s" % (
@@ -155,6 +161,11 @@ def visit_column_default(element, compiler, **kw):
         if element.default is not None
         else "DROP DEFAULT"
     )
+
+
+@compiles(ColumnComment)
+def visit_column_comment(element, compiler, **kw):
+    raise NotImplementedError('There is no COMMENT command in the SQL standard.')
 
 
 def quote_dotted(name, quote):

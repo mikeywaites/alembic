@@ -415,6 +415,16 @@ class OpTest(TestBase):
             'ALTER TABLE foo.t ALTER COLUMN c SET NOT NULL'
         )
 
+    def test_alter_column_only_sets_comment_for_supported_dialects(self):
+        op_fixture()
+        with mock.patch('alembic.ddl.impl.base.ColumnComment') as mock_comment_ddl:
+            op.alter_column(
+                "t", "c", nullable=False, existing_type=Boolean(),
+                schema='foo', comment='This is a column comment'
+            )
+
+            mock_comment_ddl.assert_not_called()
+
     def test_add_foreign_key(self):
         context = op_fixture()
         op.create_foreign_key('fk_test', 't1', 't2',

@@ -22,6 +22,7 @@ def alter_column(operations, operation):
     server_default = operation.modify_server_default
     new_column_name = operation.modify_name
     nullable = operation.modify_nullable
+    comment = operation.modify_comment
 
     def _count_constraint(constraint):
         return not isinstance(
@@ -50,6 +51,7 @@ def alter_column(operations, operation):
         existing_type=existing_type,
         existing_server_default=existing_server_default,
         existing_nullable=existing_nullable,
+        comment=comment,
         **operation.kw
     )
 

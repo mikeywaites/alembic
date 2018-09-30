@@ -3,7 +3,7 @@ import re
 from ..util import compat
 from .. import util
 from .base import compiles, alter_column, alter_table, format_table_name, \
-    format_type, AlterColumn, RenameTable
+    format_type, AlterColumn, RenameTable, ColumnComment
 from .impl import DefaultImpl
 from sqlalchemy.dialects.postgresql import INTEGER, BIGINT
 from ..autogenerate import render
@@ -238,6 +238,21 @@ def visit_column_type(element, compiler, **kw):
         alter_column(compiler, element.column_name),
         "TYPE %s" % format_type(compiler, element.type_),
         "USING %s" % element.using if element.using else ""
+    )
+
+
+@compiles(ColumnComment, "postgresql")
+def visit_column_comment(element, compiler, **kw):
+    ddl = "COMMENT ON COLUMN {table_name}.{column_name} IS '{comment}'"
+    if element.comment is None:
+        comment = 'NULL'
+    else:
+        comment = element.comment
+
+    return ddl.format(
+        table_name=element.table_name,
+        column_name=element.column_name,
+        comment=comment
     )
 
 

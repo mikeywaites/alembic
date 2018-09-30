@@ -124,6 +124,7 @@ class DefaultImpl(with_metaclass(ImplMeta)):
                      type_=None,
                      schema=None,
                      autoincrement=None,
+                     comment=None,
                      existing_type=None,
                      existing_server_default=None,
                      existing_nullable=None,
@@ -156,6 +157,19 @@ class DefaultImpl(with_metaclass(ImplMeta)):
                 existing_server_default=existing_server_default,
                 existing_nullable=existing_nullable,
             ))
+
+        # TODO (3)
+        if self.dialect.supports_comments and comment:
+            self._exec(
+                base.ColumnComment(
+                    table_name, column_name, comment,
+                    schema=schema,
+                    existing_type=existing_type,
+                    existing_server_default=existing_server_default,
+                    existing_nullable=existing_nullable,
+                )
+            )
+
         # do the new name last ;)
         if name is not None:
             self._exec(base.ColumnName(
