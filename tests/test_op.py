@@ -766,6 +766,18 @@ class OpTest(TestBase):
         eq_(t1.c.id.name, "id")
         eq_(t1.schema, "schema")
 
+    def test_create_table_emits_comment_ddl_for_supported_dialect(self):
+        context = op_fixture('postgresql')
+        op.create_table(
+            "some_table",
+            Column('id', Integer, primary_key=True),
+            Column('foo_id', Integer, ForeignKey('foo.id')),
+            comment='This is a table comment'
+        )
+        context.assert_contains(
+            "COMMENT ON TABLE some_table IS 'This is a table comment'"
+        )
+
     def test_create_table_no_pk(self):
         context = op_fixture()
         t1 = op.create_table(

@@ -208,6 +208,15 @@ class DefaultImpl(with_metaclass(ImplMeta)):
         for index in table.indexes:
             self._exec(schema.CreateIndex(index))
 
+        if self.dialect.supports_comments:
+
+            if table.comment:
+                self._exec(schema.SetTableComment(table))
+
+            for column in table.columns:
+                if column.comment is not None:
+                    self.connection.execute(schema.SetColumnComment(column))
+
     def drop_table(self, table):
         self._exec(schema.DropTable(table))
 
